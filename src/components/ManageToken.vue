@@ -11,7 +11,7 @@
 			    {{ contract.tokenName }} - {{ contract.contractAddress }}
 			  </a>
 			  <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-					<a v-for="contract in contracts" class="dropdown-item" :key="contract.id" :href="'/#/manage-token/' + contract.id">
+					<a v-for="contract in contracts" class="dropdown-item" :key="contract.id" :href="'#/manage-token/' + contract.id">
 				    {{ contract.tokenName }} - {{ contract.contractAddress }}
 					</a>
 			  </div>
