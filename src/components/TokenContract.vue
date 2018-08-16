@@ -1,42 +1,42 @@
 <template>
-<section class="contractapp">
+	<div>
   <header class="header">
-  	<div class="container-fluid">
-			<div class="jumbotron">
-			  <h1 class="display-5">Create Token Contract</h1>
-			  <p class="lead">Publish your own ERC20 token contract, easy and fast.</p>
-			</div>
-			<web3compo></web3compo>
-			<div class="input-group mb-3">
-			  <div class="input-group-prepend">
-			    <span class="input-group-text" id="basic-addon1">N</span>
-			  </div>
-			  <input type="text" class="form-control" aria-label="Token Name" aria-describedby="basic-addon1"
-			      autofocus autocomplete="off"
-			      placeholder="Name"
-			      v-model="name">
-			</div>
-			<div class="input-group mb-3">
-			  <div class="input-group-prepend">
-			    <span class="input-group-text" id="basic-addon1">S</span>
-			  </div>
-			  <input type="text" class="form-control" aria-label="Token Symbol" aria-describedby="basic-addon1"
-			      autofocus autocomplete="off"
-			      placeholder="Symbol"
-			      v-model="symbol">
-			</div>
-			<div class="input-group mb-3">
-			  <div class="input-group-prepend">
-			    <span class="input-group-text" id="basic-addon1">D</span>
-			  </div>
-			  <input type="text" class="form-control" aria-label="Token Decimals" aria-describedby="basic-addon1"
-			      autofocus autocomplete="off"
-			      placeholder="Decimals"
-			      v-model="decimals">
-			</div>
-	    <button @click="createContract" class="btn btn-primary btn-lg" :disabled="account==='No account'">
-	      Create Contract
-	    </button>
+		<div class="jumbotron">
+		  <h1 class="display-5">Create Token Contract</h1>
+		  <p class="lead">Publish your own ERC20 token contract, easy and fast.</p>
+		</div>
+		<web3compo></web3compo>
+		<div class="input-group mb-3">
+		  <div class="input-group-prepend">
+		    <span class="input-group-text" id="basic-addon1">N</span>
+		  </div>
+		  <input type="text" class="form-control" aria-label="Token Name" aria-describedby="basic-addon1"
+		      autofocus autocomplete="off"
+		      placeholder="Name"
+		      v-model="name">
+		</div>
+		<div class="input-group mb-3">
+		  <div class="input-group-prepend">
+		    <span class="input-group-text" id="basic-addon1">S</span>
+		  </div>
+		  <input type="text" class="form-control" aria-label="Token Symbol" aria-describedby="basic-addon1"
+		      autofocus autocomplete="off"
+		      placeholder="Symbol"
+		      v-model="symbol">
+		</div>
+		<div class="input-group mb-3">
+		  <div class="input-group-prepend">
+		    <span class="input-group-text" id="basic-addon1">D</span>
+		  </div>
+		  <input type="text" class="form-control" aria-label="Token Decimals" aria-describedby="basic-addon1"
+		      autofocus autocomplete="off"
+		      placeholder="Decimals"
+		      v-model="decimals">
+		</div>
+    <button @click="createContract" class="btn btn-outline-primary btn-lg" :disabled="account==='No account'">
+      Create Contract
+    </button>
+    <transition name="bounce">
 			<div class="alert alert-info alert-dismissible fade show" role="alert" style="margin-top: 20px" 
 				v-show="hashUrl">
 			  <a :href="hashUrl" target="_blank" rel="noopener noreferrer">Contract creation started, view transaction in etherscan</a>
@@ -44,6 +44,8 @@
 			    <span aria-hidden="true">&times;</span>
 			  </button>
 			</div>			
+		</transition>
+    <transition name="bounce">
 			<div class="alert alert-info alert-dismissible fade show" role="alert" style="margin-top: 20px" 
 				v-show="txMessage">
 			  {{ txMessage }}
@@ -51,31 +53,29 @@
 			    <span aria-hidden="true">&times;</span>
 			  </button>
 			</div>			
-		</div>
+		</transition>
   </header>
 
-  <section class="main2" v-show="contracts.length" v-cloak>
-  	<div class="container-fluid" style="margin-top:40px">
-			<div class="alert alert-primary" role="alert">
-			  Your Contracts
-			</div>
-      <div class="card-columns">
-				<div v-for="contract in contracts" class="card" :key="contract.id">
-				  <img class="card-img-top" src="./img/coins.png" v-bind:alt="contract.tokenName"/>
-				  <div class="card-body">
-				    <h5 class="card-title">{{ contract.tokenSymbol }}</h5>
-						<h6 class="card-subtitle mb-2 text-muted">{{ contract.tokenName }}({{ contract.tokenDecimals }})</h6>
-				    <p class="card-text"><small>Address: {{ contract.contractAddress }}</small></p>
-				    <div class="card-body" style="white-space: nowrap;">
-					    <button class="btn btn-primary" @click="manageContract(contract)">Run</button>
-					    <button class="btn btn-primary" @click="removeContract(contract)">Delete</button>
-					  </div>
+  <section class="main2" v-show="contracts.length" v-cloak style="margin-top: 1em">
+		<div class="alert alert-primary" role="alert">
+		  Your Contracts
+		</div>
+    <div class="card-columns">
+			<div v-for="contract in contracts" class="card shadow" :key="contract.id">
+			  <img class="card-img-top" src="./img/coins.png" v-bind:alt="contract.tokenName"/>
+			  <div class="card-body">
+			    <h5 class="card-title">{{ contract.tokenSymbol }}</h5>
+					<h6 class="card-subtitle mb-2 text-muted">{{ contract.tokenName }}({{ contract.tokenDecimals }})</h6>
+			    <p class="card-text"><small>Address: {{ contract.contractAddress }}</small></p>
+			    <div class="card-body">
+				    <button class="btn btn-outline-primary" style="width: 6em" @click="manageContract(contract)">Run</button>
+				    <button class="btn btn-outline-primary" style="width: 6em" @click="removeContract(contract)">Delete</button>
 				  </div>
-				</div>
-      </div>
-    </div>
+			  </div>
+  		</div>
+	  </div>
   </section>
-</section>
+</div>
 </template>
 
 <script>
@@ -110,10 +110,11 @@
 
 	  data() {
 	  	return {
+	      env: process.env.NODE_ENV,
 		    contracts: contractStorage.fetch(),
-		    name: 'My First Token',
-		    symbol: 'MFT',
-		    decimals: '18',
+		    name: '',
+		    symbol: '',
+		    decimals: '',
 		    account: '',
 		    network: '',
 		    hashUrl: '',
@@ -142,11 +143,12 @@
     },
 
     mounted() {
+    	this.setupTestData();
     },
 
 		beforeDestroy() {
-			this.$root.$off('accountInfo', null);
-			this.$root.$off('createContractResult', null);
+			this.$root.$off('accountInfo');
+			this.$root.$off('createContractResult');
 		},
 
 
@@ -164,6 +166,14 @@
 	  // methods that implement data logic.
 	  // note there's no DOM manipulation here at all.
 	  methods: {
+	  	setupTestData: function () {
+		    if (this.env == 'development') {
+		    	this.name = "My First Token";
+		    	this.symbol = "MFT";
+		    	this.decimals = "18";
+		    }
+	  	},
+
 	    createContract: function () {
 	      var tokenName = this.name && this.name.trim()
 	      var tokenSymbol = this.symbol && this.symbol.trim()
@@ -171,6 +181,9 @@
 	      if (!tokenName || !tokenSymbol || !tokenDecimals) {
 	        return
 	      }
+	      this.txMessage = '';
+	      this.hashUrl = '';
+
 	      this.name = tokenName;
 	      this.symbol = tokenSymbol;
 	      this.decimals = tokenDecimals;
@@ -218,4 +231,23 @@
     background-size: cover;
     color: #fff;    
 }	
+
+.bounce-enter-active {
+  animation: bounce-in .5s;
+}
+.bounce-leave-active {
+  animation: bounce-in .5s reverse;
+}
+@keyframes bounce-in {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.5);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
 </style>

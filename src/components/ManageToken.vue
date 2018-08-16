@@ -1,6 +1,10 @@
 <template>
 	<div>
-		<header>
+		<header class="header">
+			<div class="jumbotron">
+			  <h1 class="display-5">Manage Your Token</h1>
+			  <p class="lead">Manage your token contracts.</p>
+			</div>
 			<web3compo></web3compo>
 			<div class="dropdown">
 			  <a class="btn btn-primary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -58,7 +62,7 @@
 					      placeholder="Mint Amount"
 					      v-model="mintAmount">
 					</div>
-			    <button @click="mintToken" class="btn btn-primary">
+			    <button @click="mintToken" class="btn btn-outline-primary">
 			      Mint Token
 			    </button>
 
@@ -101,7 +105,7 @@
 					      placeholder="Transfer Amount"
 					      v-model="transferAmount">
 					</div>
-			    <button @click="transferToken" class="btn btn-primary">
+			    <button @click="transferToken" class="btn btn-outline-primary">
 			      Transfer Token
 			    </button>
 
@@ -156,14 +160,15 @@
 
 	  data() {
 	  	return {
+        env: process.env.NODE_ENV,
 		    contracts: contractStorage.fetch(),
 		    contract: {},
 		    account: '',
 		    network: '',
 		    tokenSupply: 0,
-		    mintTo: '0x2bC471eF0E259aB41f578A540a45f8f64c598882',
+		    mintTo: '',
 		    mintAmount: '',
-		    transferTo: '0xF6791CB4A2037Ddb58221b84678a6ba992cda11d',
+		    transferTo: '',
 		    transferAmount: '',
 		    accountBalance: '0',
 		    hashUrl: '',
@@ -207,9 +212,9 @@
     },
 
 		beforeDestroy() {
-			this.$root.$off('accountInfo', null);
-			this.$root.$off('callResult', null);
-			this.$root.$off('sendTxResult', null);
+			this.$root.$off('accountInfo');
+			this.$root.$off('callResult');
+			this.$root.$off('sendTxResult');
 		},
 
     mounted() {
@@ -222,6 +227,10 @@
       	this.getTotalSupply();
 	      if (this.account != '')
 		     	this.getBalanceOf();
+		    if (this.env == 'development') {
+		    	this.mintTo = "0x2bC471eF0E259aB41f578A540a45f8f64c598882";
+		    	this.transferTo = "0xF6791CB4A2037Ddb58221b84678a6ba992cda11d";
+		    }
       },
 
       getTotalSupply: function() {
@@ -288,6 +297,13 @@
 </script>
 
 <style>
+.jumbotron
+{
+    background: url('./img/ethereum.jpg') no-repeat center center; 
+    background-size: cover;
+    color: #fff;    
+}	
+
 .tab-content {
     border-left: 1px solid #ddd;
     border-right: 1px solid #ddd;
@@ -312,4 +328,6 @@
     transform: scale(1);
   }
 }
+
+
 </style>

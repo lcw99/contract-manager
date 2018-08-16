@@ -15,27 +15,18 @@ export default new Router({
       redirect: '/token-contract'
     },
     {
-      path: '/about',
-      name: 'About',
-      component: About
-    },
-    {
       path: '/token-contract',
       name: 'TokenContract',
       component: TokenContract
     },
     {
       path: '/manage-token',
+      redirect: '/manage-token/0'
     },
     {
       path: '/manage-token/:id',
       name: 'ManageToken',
       component: ManageToken
     },
-    {
-      path: '/coins/:id',
-      name: 'Coins',
-      component: Coins
-    }
   ]
 })

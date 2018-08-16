@@ -45,9 +45,9 @@
     },
 
 		beforeDestroy() {
-			this.$root.$off('getTotalSupply', null);
-			this.$root.$off('mintToken', null);
-			this.$root.$off('createContract', null);
+			this.$root.$off('callContractMethod');
+			this.$root.$off('sendContractMethod');
+			this.$root.$off('createContract');
 		},
 
     methods: {
