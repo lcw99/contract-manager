@@ -9,16 +9,10 @@
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav mr-auto" >
           <li class="nav-item">
-            <router-link class="nav-link" exact-active-class="active" :to="{ name: 'Hello' }">Home</router-link>
-          </li>
-          <li class="nav-item">
-            <router-link class="nav-link" exact-active-class="active" to="/coins/ethereum">Ethereum</router-link>
-          </li>
-          <li class="nav-item">
-            <router-link class="nav-link" exact-active-class="active" to="/coins/bitcoin">Bitcoin</router-link>
-          </li>
-          <li class="nav-item">
             <router-link class="nav-link" exact-active-class="active" to="/token-contract">Token Contract</router-link>
+          </li>
+          <li class="nav-item">
+            <router-link class="nav-link" active-class="active" to="/manage-token">Manage Token</router-link>
           </li>
         </ul>  
       </div>

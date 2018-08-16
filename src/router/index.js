@@ -4,10 +4,9 @@ import Hello from '@/components/Hello'
 import About from '@/components/About'
 import Coins from '@/components/Coins'
 import TokenContract from '@/components/TokenContract'
-import BootstrapVue from 'bootstrap-vue'
+import ManageToken from '@/components/ManageToken'
 
 Vue.use(Router)
-Vue.use(BootstrapVue);
 
 export default new Router({
   routes: [
@@ -25,6 +24,15 @@ export default new Router({
       path: '/token-contract',
       name: 'TokenContract',
       component: TokenContract
+    },
+    {
+      path: '/manage-token',
+      redirect: '/manage-token/0'
+    },
+    {
+      path: '/manage-token/:id',
+      name: 'ManageToken',
+      component: ManageToken
     },
     {
       path: '/coins/:id',
