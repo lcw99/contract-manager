@@ -12,8 +12,7 @@ export default new Router({
   routes: [
     {
       path: '/',
-      name: 'Hello',
-      component: Hello
+      redirect: '/token-contract'
     },
     {
       path: '/about',
@@ -27,7 +26,6 @@ export default new Router({
     },
     {
       path: '/manage-token',
-      redirect: '/manage-token/0'
     },
     {
       path: '/manage-token/:id',

@@ -194,7 +194,7 @@
 	    },
 
 	    manageContract: function (contract) {
-	    	window.location = "/#/manage-token/" + this.contracts.indexOf(contract);
+	    	window.location = "#/manage-token/" + this.contracts.indexOf(contract);
 	    }
 
 	  },
