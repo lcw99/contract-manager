@@ -17,6 +17,9 @@
           <li class="nav-item">
             <router-link class="nav-link" active-class="active" to="/manage-token">Manage Token</router-link>
           </li>
+          <li class="nav-item">
+            <router-link class="nav-link" active-class="active" to="/about">About</router-link>
+          </li>
         </ul>  
       </div>
     </nav>

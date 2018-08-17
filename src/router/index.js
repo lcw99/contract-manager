@@ -4,6 +4,7 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import TokenContract from '@/components/TokenContract'
 import ManageToken from '@/components/ManageToken'
+import About from '@/components/About'
 
 Vue.use(Router)
 
@@ -26,6 +27,11 @@ export default new Router({
       path: '/manage-token/:id',
       name: 'ManageToken',
       component: ManageToken
+    },
+    {
+      path: '/about',
+      name: 'About',
+      component: About
     },
   ]
 })
