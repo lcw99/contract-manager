@@ -5,7 +5,7 @@
 		  <h1 class="display-5">Create Token Contract</h1>
 		  <p class="lead">Publish your own ERC20 token contract, easy and fast.</p>
 		</div>
-		<web3compo></web3compo>
+		<web3compo ref="web3Compo" @accountInfo="accountInfo" @createContractResult="createContractResult"></web3compo>
 		<div class="input-group mb-3">
 		  <div class="input-group-prepend">
 		    <span class="input-group-text" id="basic-addon1">N</span>
@@ -40,18 +40,12 @@
 			<div class="alert alert-info alert-dismissible fade show" role="alert" style="margin-top: 20px" 
 				v-show="hashUrl">
 			  <a :href="hashUrl" target="_blank" rel="noopener noreferrer">Contract creation started, view transaction in etherscan</a>
-			  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-			    <span aria-hidden="true">&times;</span>
-			  </button>
 			</div>			
 		</transition>
     <transition name="bounce">
 			<div class="alert alert-info alert-dismissible fade show" role="alert" style="margin-top: 20px" 
 				v-show="txMessage">
 			  {{ txMessage }}
-			  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-			    <span aria-hidden="true">&times;</span>
-			  </button>
 			</div>			
 		</transition>
   </header>
@@ -125,21 +119,6 @@
 	  },
 
     created() {
-    	this.$root.$on('accountInfo', (accountInfo, network) => {
-    		console.log("accountInfo=" + accountInfo + "," + network);
-    		this.account = accountInfo;
-    		this.network = network;
-      });
-    	this.$root.$on('createContractResult', (transactionHash, txMessage, contractAddress) => {
-    		if (transactionHash != "") 
-    			this.hashUrl = "https://" + this.network + ".etherscan.io/tx/" + transactionHash;
-    		if (txMessage != "") 
-    			this.txMessage = txMessage;
-  			if (contractAddress != "") {
-  				console.log("addContract=" + contractAddress);
-  				this.addContract(contractAddress);
-  			}
-      });
     },
 
     mounted() {
@@ -147,8 +126,6 @@
     },
 
 		beforeDestroy() {
-			this.$root.$off('accountInfo');
-			this.$root.$off('createContractResult');
 		},
 
 
@@ -166,6 +143,23 @@
 	  // methods that implement data logic.
 	  // note there's no DOM manipulation here at all.
 	  methods: {
+    	accountInfo(accountInfo, network) {
+    		console.log("accountInfo=" + accountInfo + "," + network);
+    		this.account = accountInfo;
+    		this.network = network;
+      },
+
+    	createContractResult(transactionHash, txMessage, contractAddress) {
+    		if (transactionHash != "") 
+    			this.hashUrl = "https://" + this.network + ".etherscan.io/tx/" + transactionHash;
+    		if (txMessage != "") 
+    			this.txMessage = txMessage;
+  			if (contractAddress != "") {
+  				console.log("addContract=" + contractAddress);
+  				this.addContract(contractAddress);
+  			}
+      },
+
 	  	setupTestData: function () {
 		    if (this.env == 'development') {
 		    	this.name = "My First Token";
@@ -187,7 +181,8 @@
 	      this.name = tokenName;
 	      this.symbol = tokenSymbol;
 	      this.decimals = tokenDecimals;
-	    	this.$root.$emit('createContract', this.name, this.symbol, this.decimals);
+	      this.$refs.web3Compo.createContract(this.name, this.symbol, this.decimals);
+	    	//this.$root.$emit('createContract', this.name, this.symbol, this.decimals);
 	    },
 
 	    addContract: function (contractAddress) {

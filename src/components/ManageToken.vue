@@ -5,7 +5,7 @@
 			  <h1 class="display-5">Manage Your Token</h1>
 			  <p class="lead">Manage your token contracts.</p>
 			</div>
-			<web3compo></web3compo>
+			<web3compo ref="web3Compo" @accountInfo="accountInfo" @callResult="callResult" @sendTxResult="sendTxResult"></web3compo>
 			<div class="dropdown">
 			  <a class="btn btn-primary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 			    {{ contract.tokenName }} - {{ contract.contractAddress }}
@@ -70,18 +70,12 @@
 						<div class="alert alert-info alert-dismissible fade show" role="alert" style="margin-top: 20px" 
 							v-show="hashUrl">
 						  <a :href="hashUrl" target="_blank" rel="noopener noreferrer">Minting started, view transaction in etherscan</a>
-						  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-						    <span aria-hidden="true">&times;</span>
-						  </button>
 						</div>			
 					</transition>
 			    <transition name="bounce">
 						<div class="alert alert-info alert-dismissible fade show" role="alert" style="margin-top: 20px" 
 							v-show="txMessage">
 						  {{ txMessage }}
-						  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-						    <span aria-hidden="true">&times;</span>
-						  </button>
 						</div>			
 					</transition>
 			  </div>
@@ -113,18 +107,12 @@
 						<div class="alert alert-info alert-dismissible fade show" role="alert" style="margin-top: 20px" 
 							v-show="hashUrl" >
 						  <a :href="hashUrl" target="_blank" rel="noopener noreferrer">Transfer started, view transaction in etherscan</a>
-						  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-						    <span aria-hidden="true">&times;</span>
-						  </button>
 						</div>			
 					</transition>
 			    <transition name="bounce">
 						<div class="alert alert-info alert-dismissible fade show" role="alert" style="margin-top: 20px" 
 							v-show="txMessage">
 						  {{ txMessage }}
-						  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-						    <span aria-hidden="true">&times;</span>
-						  </button>
 						</div>			
 					</transition>
 			  </div>
@@ -138,6 +126,7 @@
 <script>
 	import Web3Compo from '@/components/Web3'
 	var bigdecimal = require("bigdecimal");
+	var $ = require('jquery');
 
 	var STORAGE_KEY = 'token-contracts-v1'
 	var contractStorage = {
@@ -178,27 +167,46 @@
 	  },
 
     watch: {
-      '$route': 'fetchData'
+      '$route': 'fetchData',
     },
 
 	  created() {
-    	this.$root.$on('accountInfo', (accountInfo, network) => {
+    	var vm = this;
+			$(document).ready(function(){
+			  $('#myTab a').click(function (link) {
+			    vm.txMessage = "";
+			    vm.hashUrl = "";
+			  })
+			});
+    },
+
+		beforeDestroy() {
+		},
+
+    mounted() {
+      this.fetchData();
+    },
+
+    methods: {
+    	accountInfo(accountInfo, network) {
     		//console.log("accountInfo=" + accountInfo);
     		if (this.account != accountInfo) {
     			this.account = accountInfo;
 	      	this.getBalanceOf();
     		}
     		this.network = network;
-      });
-    	this.$root.$on('callResult', (method, result) => {
+      },
+
+    	callResult(method, result) { 
     		console.log(method + " callResult=" + result);
     		if (method == "totalSupply") {
 	    		this.tokenSupply = this.getAmountDivDecimals(result);
 		   	} else if (method == "balanceOf") {
 		   		this.accountBalance = this.getAmountDivDecimals(result);
 		   	}
-      });
-    	this.$root.$on('sendTxResult', (method, transactionHash, txMessage, completed) => {
+      },
+
+    	sendTxResult(method, transactionHash, txMessage, completed) {
     		console.log("sendTxResult=" + transactionHash + "," + txMessage);
     		if (transactionHash != "")
     			this.hashUrl = "https://" + this.network + ".etherscan.io/tx/" + transactionHash;
@@ -208,20 +216,8 @@
 	      	this.getTotalSupply();
 	      	this.getBalanceOf();
     		}
-      });
-    },
+      },
 
-		beforeDestroy() {
-			this.$root.$off('accountInfo');
-			this.$root.$off('callResult');
-			this.$root.$off('sendTxResult');
-		},
-
-    mounted() {
-      this.fetchData();
-    },
-
-    methods: {
       fetchData() {
       	this.contract = this.contracts[parseInt(this.$route.params.id)];
       	this.getTotalSupply();
@@ -234,11 +230,13 @@
       },
 
       getTotalSupply: function() {
-	    	this.$root.$emit('callContractMethod', this.contract.contractAddress, "totalSupply", []);
+      	this.$refs.web3Compo.callContractMethod(this.contract.contractAddress, "totalSupply", []);
+	    	//this.$emit('callContractMethod', this.contract.contractAddress, "totalSupply", []);
       },
 
       getBalanceOf: function() {
-	    	this.$root.$emit('callContractMethod', this.contract.contractAddress, "balanceOf", [this.account]);
+      	this.$refs.web3Compo.callContractMethod(this.contract.contractAddress, "balanceOf", [this.account]);
+	    	//this.$emit('callContractMethod', this.contract.contractAddress, "balanceOf", [this.account]);
       },
 
       getAmountMulDecimals: function (amount) {
@@ -273,8 +271,10 @@
 	      this.hashUrl = '';
 	      this.mintTo = mintTo;
 	      this.mintAmount = mintAmount;
-	    	this.$root.$emit('sendContractMethod', this.contract.contractAddress, 
-	    		"mint", [this.mintTo, this.getAmountMulDecimals(mintAmount)]);
+	      this.$refs.web3Compo.sendContractMethod(this.contract.contractAddress, 
+	      	"mint", [this.mintTo, this.getAmountMulDecimals(mintAmount)]);
+	    	//this.$emit('sendContractMethod', this.contract.contractAddress, 
+	    	//	"mint", [this.mintTo, this.getAmountMulDecimals(mintAmount)]);
       },
 
       transferToken() {
@@ -287,8 +287,10 @@
 	      this.hashUrl = '';
 	      this.transferTo = transferTo;
 	      this.transferAmount = transferAmount;
-	    	this.$root.$emit('sendContractMethod', this.contract.contractAddress, 
+	      this.$refs.web3Compo.sendContractMethod(this.contract.contractAddress, 
 	    		"transfer", [this.transferTo, this.getAmountMulDecimals(transferAmount)]);
+	    	//this.$emit('sendContractMethod', this.contract.contractAddress, 
+	    	//	"transfer", [this.transferTo, this.getAmountMulDecimals(transferAmount)]);
       }
 
     }

@@ -1,3 +1,5 @@
+import 'babel-polyfill'
+import 'es6-promise/auto'
 import Vue from 'vue'
 import Router from 'vue-router'
 import TokenContract from '@/components/TokenContract'

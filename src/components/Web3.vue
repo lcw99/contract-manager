@@ -32,22 +32,26 @@
     },
 
     mounted() {
-    	this.$root.$on('callContractMethod', (contractAddress, method, params) => {
+    	/*
+    	this.$on('callContractMethod', (contractAddress, method, params) => {
     		console.log("callContractMethod=" + method);
     		this.callContractMethod(contractAddress, method, params);
       });
-    	this.$root.$on('sendContractMethod', (contractAddress, method, params) => {
+    	this.$on('sendContractMethod', (contractAddress, method, params) => {
     		this.sendContractMethod(contractAddress, method, params);
       });
-    	this.$root.$on('createContract', (name, symbol, decimals) => {
+    	this.$on('createContract', (name, symbol, decimals) => {
     		this.createContract(name, symbol, decimals);
       });
+      */
     },
 
 		beforeDestroy() {
-			this.$root.$off('callContractMethod');
-			this.$root.$off('sendContractMethod');
-			this.$root.$off('createContract');
+			/*
+			this.$off('callContractMethod');
+			this.$off('sendContractMethod');
+			this.$off('createContract');
+			*/
 		},
 
     methods: {
@@ -73,7 +77,7 @@
 		    	if (typeof this.account == "undefined")
 		    		this.account = "No account";
 		    	//console.log("accountInfo emited");
-		    	this.$root.$emit('accountInfo', this.account, this.network);
+		    	this.$emit('accountInfo', this.account, this.network);
 				});
 		  },
 
@@ -96,15 +100,15 @@
 	          }, function(error, transactionHash){ console.log(transactionHash) })
 	            .on('error', function(error){ 
 	              console.log(error);
-					    	vm.$root.$emit('createContractResult', "", "" + error, "");
+					    	vm.$emit('createContractResult', "", "" + error, "");
 	            })
 	            .on('transactionHash', function(transactionHash){ 
 	              console.log("on txHash-" + transactionHash);
-					    	vm.$root.$emit('createContractResult', transactionHash, "", "");
+					    	vm.$emit('createContractResult', transactionHash, "", "");
 	            })
 	            .on('receipt', function(receipt){
 	              console.log("onreceipt=" + receipt.contractAddress); 
-					    	vm.$root.$emit('createContractResult', receipt.transactionHash, "Contract creation completed.", receipt.contractAddress);
+					    	vm.$emit('createContractResult', receipt.transactionHash, "Contract creation completed.", receipt.contractAddress);
 	            })
 	            .on('confirmation', function(confirmationNumber, receipt) { 
 	              console.log("on confirmation=" + confirmationNumber) 
@@ -141,7 +145,7 @@
 		    var txObj = { to: contractAddress, data: methodABI };
 		    var eventName = "callResult";
 		    web3local.eth.call(txObj).then((result) => {
-		    	this.$root.$emit(eventName, method, result);
+		    	vm.$emit(eventName, method, result);
 		    }).catch((error) => {                                                                           
 	        console.log(error);                                                                         
 		    });
@@ -155,15 +159,15 @@
 		    web3local.eth.sendTransaction(txObj)
     			.on('receipt', function(receipt) {
     				//console.log(receipt);
-			    	vm.$root.$emit(eventName, method, receipt.transactionHash, method + " completed.", true);
+			    	vm.$emit(eventName, method, receipt.transactionHash, method + " completed.", true);
     			})
           .on('error', function(error){ 
             console.log(error);
-			    	vm.$root.$emit(eventName, method, "", "" + error, false);
+			    	vm.$emit(eventName, method, "", "" + error, false);
           })
           .on('transactionHash', function(transactionHash){ 
             console.log("on txHash-" + transactionHash);
-			    	vm.$root.$emit(eventName, method, transactionHash, "", false);
+			    	vm.$emit(eventName, method, transactionHash, "", false);
           });
      }
 
