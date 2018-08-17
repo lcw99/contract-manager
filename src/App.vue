@@ -24,7 +24,7 @@
   <main class="container">
     <router-view></router-view>
     <div class="shadow p-3 mb-5 bg-white rounded" style="margin-top: 5em; text-align: right;">
-      <small>&#169; Smallet Networks Inc, 2018, {{env}}</small> 
+      <small>&#169; <a href="https://smallet.co" target="_blank" rel="noopener noreferrer">Smallet Networks Inc</a>, 2018, {{env}}</small> 
     </div>
   </main>
 </div>
