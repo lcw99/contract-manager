@@ -60,7 +60,11 @@
 			  <div class="card-body">
 			    <h5 class="card-title">{{ contract.tokenSymbol }}</h5>
 					<h6 class="card-subtitle mb-2 text-muted">{{ contract.tokenName }}({{ contract.tokenDecimals }})</h6>
-			    <p class="card-text"><small>Address: {{ contract.contractAddress }}</small></p>
+			    <p class="card-text"><small>
+			    	<a :href="networkToEtherscanUrl(contract.network) + 'address/' + contract.contractAddress" target="_blank">
+			    		{{ contract.contractAddress }}
+			    	</a>
+			   	</small></p>
 			    <div class="card-body">
 				    <button class="btn btn-outline-primary" style="width: 6em" @click="manageContract(contract)">Run</button>
 				    <button class="btn btn-outline-primary" style="width: 6em" @click="removeContract(contract)">Delete</button>
@@ -81,7 +85,7 @@
 	  fetch: function () {
 	    var contracts = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]')
 	    contracts.forEach(function (contract, index) {
-	      contract.id = index
+	      contract.id = index;
 	    })
 	    contractStorage.uid = contracts.length
 	    return contracts
@@ -140,9 +144,20 @@
 	  },
 
 
-	  // methods that implement data logic.
-	  // note there's no DOM manipulation here at all.
+	  computed: {
+	  	etherscanUrl: function () {
+	  		return this.networkToEtherscanUrl(this.network);
+	  	}
+	  },
+
 	  methods: {
+	  	networkToEtherscanUrl(network) {
+	  		if (network == 'main')
+	  			return "https://etherscan.io/";
+	  		else
+	  			return "https://" + network + ".etherscan.io/";
+	  	},
+
     	accountInfo(accountInfo, network) {
     		console.log("accountInfo=" + accountInfo + "," + network);
     		this.account = accountInfo;
@@ -182,7 +197,6 @@
 	      this.symbol = tokenSymbol;
 	      this.decimals = tokenDecimals;
 	      this.$refs.web3Compo.createContract(this.name, this.symbol, this.decimals);
-	    	//this.$root.$emit('createContract', this.name, this.symbol, this.decimals);
 	    },
 
 	    addContract: function (contractAddress) {
@@ -192,7 +206,7 @@
           tokenSymbol: this.symbol,
           tokenDecimals: this.decimals,
           contractAddress: contractAddress,
-          completed: false
+          network: this.network
         })
 
 	    },

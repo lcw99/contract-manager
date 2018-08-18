@@ -25,7 +25,12 @@
 			  <ul class="list-group list-group-flush">
 			    <li class="list-group-item">{{ contract.tokenName }} <span class="badge badge-info">Name</span></li>
 			    <li class="list-group-item">{{ contract.tokenDecimals }} <span class="badge badge-info">Decimals</span></li>
-			    <li class="list-group-item">{{ contract.contractAddress }} <span class="badge badge-info">Contarct Address</span></li>
+			    <li class="list-group-item">
+			    	<a :href="networkToEtherscanUrl(contract.network) + 'address/' + contract.contractAddress" target="_blank">
+			    		{{ contract.contractAddress }}
+			    	</a>
+			    	<span class="badge badge-info">Contarct Address</span>
+			    </li>
 			    <li class="list-group-item">{{ tokenSupply }} <span class="badge badge-info">Total Supply</span></li>
 			    <li class="list-group-item">{{ accountBalance }} <span class="badge badge-info">Account Balance</span></li>
 			  </ul>
@@ -188,6 +193,13 @@
     },
 
     methods: {
+	  	networkToEtherscanUrl(network) {
+	  		if (network == 'main')
+	  			return "https://etherscan.io/";
+	  		else
+	  			return "https://" + network + ".etherscan.io/";
+	  	},
+
     	accountInfo(accountInfo, network) {
     		//console.log("accountInfo=" + accountInfo);
     		if (this.account != accountInfo) {
