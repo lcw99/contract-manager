@@ -3,14 +3,11 @@
 		<div class="card border-primary mb-3">
 		  <div class="card-header">About</div>
 		  <div class="card-body text-primary">
-		    <h5 class="card-title">ERC20 Token Publisher</h5>
+		    <h5 class="card-title">{{ $t('about-title') }}</h5>
 		    <p class="card-text">
-		    	I have created a service that allows anyone to easily publish an ERC20 token. Try it out for fun.
+		    	{{ $t('about-text1')}}
 		    </p>
-		    <p class="card-text">
-		    	This project using Vue, Bootstrap, web3, 
-			    Source code is <a href="https://github.com/lcw99/contract-manager">here</a>
-		    </p>
+		    <p class="card-text" v-html="$t('about-text2')"/>
 		  </div>
 		</div>		
   </div>
@@ -22,9 +19,3 @@ export default {
 }
 </script>
 
-<style>
-	.jumbotron
-	{
-	}	
-
-</style>

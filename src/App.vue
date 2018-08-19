@@ -12,16 +12,29 @@
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav mr-auto" >
           <li class="nav-item">
-            <router-link class="nav-link" exact-active-class="active" to="/token-contract">Token Contract</router-link>
+            <router-link class="nav-link" exact-active-class="active" to="/token-contract">{{ $t('menu-create-token') }}</router-link>
           </li>
           <li class="nav-item">
-            <router-link class="nav-link" active-class="active" to="/manage-token">Manage Token</router-link>
+            <router-link class="nav-link" active-class="active" to="/manage-token">{{ $t('menu-manage-token') }}</router-link>
           </li>
           <li class="nav-item">
             <router-link class="nav-link" active-class="active" to="/about">About</router-link>
           </li>
         </ul>  
       </div>
+
+      <form class="form-inline my-2 my-lg-0">
+        <div class="dropdown">
+          <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            {{ localeDisp }}
+          </button>
+          <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
+            <button class="dropdown-item" type="button" @click="locale='en'">English</button>
+            <button class="dropdown-item" type="button" @click="locale='ko'">Korean</button>
+          </div>
+        </div>
+      </form>
+
     </nav>
   </header>
   <main class="container">
@@ -41,9 +54,32 @@
     name: 'App',
     data() {
       return {
-        env: process.env.NODE_ENV
+        env: process.env.NODE_ENV,
+        locale: 'en'
       }
-    } 
+    },
+
+    mounted() {
+      var userLang = navigator.language || navigator.userLanguage; 
+      console.log("language=" + userLang);
+      this.locale = userLang.substring(0, 2);
+    },
+
+    computed: {
+      localeDisp: function () {
+        if (this.locale == 'ko')
+          return "Korean";
+        else 
+          return "English";
+      }
+    },
+
+    watch: {
+      locale (val) {
+        this.$i18n.locale = val
+      }
+    },
+
   }
 </script>
 

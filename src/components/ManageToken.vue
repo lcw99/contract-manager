@@ -2,8 +2,8 @@
 	<div>
 		<header class="header">
 			<div class="jumbotron">
-			  <h1 class="display-5">Manage Your Token</h1>
-			  <p class="lead">Manage your token contracts.</p>
+			  <h1 class="display-5">{{ $t('jumbo-title-manage-token') }}</h1>
+			  <p class="lead">{{ $t('jumbo-text-manage-token') }}</p>
 			</div>
 			<web3compo ref="web3Compo" @accountInfo="accountInfo" @callResult="callResult" @sendTxResult="sendTxResult"></web3compo>
 			<div class="dropdown">
@@ -39,10 +39,13 @@
 			<!-- Nav tabs -->
 			<ul class="nav nav-tabs" id="myTab" role="tablist">
 			  <li class="nav-item">
-			    <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Mint</a>
+			    <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">
+			    	{{ $t('tab-mint') }}
+			    </a>
 			  </li>
 			  <li class="nav-item">
-			    <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">Transfer</a>
+			    <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">	{{ $t('tab-transfer') }}
+			    </a>
 			  </li>
 			</ul>
 
@@ -68,7 +71,7 @@
 					      v-model="mintAmount">
 					</div>
 			    <button @click="mintToken" class="btn btn-outline-primary">
-			      Mint Token
+			      {{ $t('mint-token') }}
 			    </button>
 
 			    <transition name="bounce">
@@ -105,7 +108,7 @@
 					      v-model="transferAmount">
 					</div>
 			    <button @click="transferToken" class="btn btn-outline-primary">
-			      Transfer Token
+						{{ $t('transfer-token') }}
 			    </button>
 
 			    <transition name="bounce">

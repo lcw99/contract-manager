@@ -1,0 +1,18 @@
+{
+  "about-title": "ERC20 토큰 발행",
+  "about-text1": "ERC20 토큰을 발행해 보는 서비스입니다.",
+  "about-text2": "Vue, Bootstrap, web3를 사용하여 만들었습니다. 소스코드는 <a href='https://github.com/lcw99/contract-manager'><u>여기</u></a>있습니다.",
+  "menu-create-token": "토큰 생성",
+  "menu-manage-token": "토큰 관리",
+  "jumbo-title-create-token": "토큰 컨트랙트 생성하기",
+  "jumbo-text-create-token": "자신만의 ERC20 토큰을 쉽고 빠르게 만들어 보세요.",
+  "jumbo-title-manage-token": "토큰 관리 하기",
+  "jumbo-text-manage-token": "토큰 컨트랙트 실행 해보기.",
+  "tab-mint": "주조",
+  "tab-transfer": "전송",
+  "mint-token": "토큰 주조",
+  "transfer-token": "토큰 전송",
+  "run": "실행",
+  "delete": "삭제",
+  "last":"last"
+}

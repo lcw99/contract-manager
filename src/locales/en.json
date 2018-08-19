@@ -1,0 +1,18 @@
+{
+  "about-title": "ERC20 Token Publisher",
+  "about-text1": "I have created a service that allows anyone to easily publish an ERC20 token. Try it out for fun.",
+  "about-text2": "This project using Vue, Bootstrap, web3, Source code is <a href='https://github.com/lcw99/contract-manager'><u>here</u></a>",
+  "menu-create-token": "Create Token",
+  "menu-manage-token": "Manage Token",
+  "jumbo-title-create-token": "Create Token Contract",
+  "jumbo-text-create-token": "Publish your own ERC20 token contract, easy and fast.",
+  "jumbo-title-manage-token": "Manage Your Token",
+  "jumbo-text-manage-token": "Run your token contracts.",
+  "tab-mint": "Mint",
+  "tab-transfer": "Transfer",
+  "mint-token": "Mint Token",
+  "transfer-token": "Transfer Token",
+  "run": "Run",
+  "delete": "Delete",
+  "last":"last"
+}

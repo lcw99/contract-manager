@@ -2,8 +2,8 @@
 	<div>
   <header class="header">
 		<div class="jumbotron">
-		  <h1 class="display-5">Create Token Contract</h1>
-		  <p class="lead">Publish your own ERC20 token contract, easy and fast.</p>
+		  <h1 class="display-5">{{ $t('jumbo-title-create-token') }}</h1>
+		  <p class="lead">{{ $t('jumbo-text-create-token') }}</p>
 		</div>
 		<web3compo ref="web3Compo" @accountInfo="accountInfo" @createContractResult="createContractResult"></web3compo>
 		<div class="input-group mb-3">
@@ -34,7 +34,7 @@
 		      v-model="decimals">
 		</div>
     <button @click="createContract" class="btn btn-outline-primary btn-lg" :disabled="account==='No account'">
-      Create Contract
+      {{ $t('menu-create-token') }}
     </button>
     <transition name="bounce">
 			<div class="alert alert-info alert-dismissible fade show" role="alert" style="margin-top: 20px" 
@@ -66,8 +66,8 @@
 			    	</a>
 			   	</small></p>
 			    <div class="card-body">
-				    <button class="btn btn-outline-primary" style="width: 6em" @click="manageContract(contract)">Run</button>
-				    <button class="btn btn-outline-primary" style="width: 6em" @click="removeContract(contract)">Delete</button>
+				    <button class="btn btn-outline-primary" style="width: 6em" @click="manageContract(contract)">{{ $t('run') }}</button>
+				    <button class="btn btn-outline-primary" style="width: 6em" @click="removeContract(contract)">{{ $t('delete') }}</button>
 				  </div>
 			  </div>
   		</div>
