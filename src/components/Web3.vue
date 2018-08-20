@@ -1,9 +1,14 @@
 <template>
 	<div>
 		<header>
-			<div v-bind:class="[account==='No account' ? 'alert alert-warning' : 'alert alert-primary']" role="alert">
-			  <span v-if="account=='No account'">Connect to metamask</span>
-			  <span v-else>{{ network }}: {{ account }} </span>
+			<div class="d-flex bd-highlight" style="margin-bottom: 1em">
+			  <div class="p-2 flex-grow-1 bd-highlight border border-primary">
+					<span v-if="account=='No account'">Connect to metamask</span>
+			  	<span v-else>{{ network }}: {{ account }} </span>
+			  </div>
+				<button type="button" class="btn btn-outline-primary" style="margin-left: 5px" @click="connectToDevice">
+			    <span>Connect</span>
+			  </button>			  
 			</div>
 		</header>
 	</div>
@@ -11,9 +16,23 @@
 
 <script>
 	import Web3 from "web3";
+	import axios from 'axios'
 	import { generalTokenAbi, generalTokenCode } from './generalToken.js'
+	import ZeroClientProvider from 'web3-provider-engine/zero.js'
 
+	const infuraUrl = ["https://mainnet.infura.io/", "https://ropsten.infura.io/", "https://kovan.infura.io/", "https://rinkeby.infura.io/"];
 	var web3local = null;
+
+	var STORAGE_KEY = 'connected-device-v1'
+	var connectedDeviceStorage = {
+	  fetch: function () {
+	    var connectedDevice = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}')
+	    return connectedDevice
+	  },
+	  save: function (connectedDevice) {
+	    localStorage.setItem(STORAGE_KEY, JSON.stringify(connectedDevice))
+	  }
+	}
 
   export default {
 		name: 'Web3',
@@ -21,29 +40,24 @@
 	  data() {
 	  	return {
 		    account: '',
+		    connectedDevice: connectedDeviceStorage.fetch(),
 		    network: '',
 		    web3UpdateListenerAttached: false,
 		    visibility: 'all'
 		  }
 	  },
 
+	  watch: {
+	    connectedDevice: {
+	      handler: function (connectedDevice) {
+	        connectedDeviceStorage.save(connectedDevice)
+	      },
+	      deep: true
+	    }
+	  },
+
 	  created() {
       this.initWeb3();
-    },
-
-    mounted() {
-    	/*
-    	this.$on('callContractMethod', (contractAddress, method, params) => {
-    		console.log("callContractMethod=" + method);
-    		this.callContractMethod(contractAddress, method, params);
-      });
-    	this.$on('sendContractMethod', (contractAddress, method, params) => {
-    		this.sendContractMethod(contractAddress, method, params);
-      });
-    	this.$on('createContract', (name, symbol, decimals) => {
-    		this.createContract(name, symbol, decimals);
-      });
-      */
     },
 
 		beforeDestroy() {
@@ -57,26 +71,96 @@
     methods: {
 		  initWeb3: function () {
 				console.log("initWeb3 called");
-		    if (typeof web3 == 'undefined')
-		      this.account = "No account";
-		    var vm = this;
-		    if (!this.web3UpdateListenerAttached)
-					web3.currentProvider.publicConfigStore.on('update', function(data) {
-						//console.log("metamask updated");
-						vm.getMetamaskInfo();
-					});
-				this.web3UpdateListenerAttached = true;
-		    web3local = new Web3(web3.currentProvider);
+		    if (typeof web3 == 'undefined' || typeof web3.eth.defaultAccount == 'undefined') {
+		    	if (typeof this.connectedDevice.myAddress != 'undefined') {
+		    		this.account = this.connectedDevice.myAddress;
+		    		this.connectedDeviceToken = this.connectedDevice.deviceToken;
+		    		this.network = this.connectedDevice.network;
+		    		this.buildZeroClient();
+		    	} else
+		    		this.account = "No Account";
+		    } else {
+			    var vm = this;
+			    if (!this.web3UpdateListenerAttached)
+						web3.currentProvider.publicConfigStore.on('update', function(data) {
+							//console.log("metamask updated");
+							vm.getMetamaskInfo();
+						});
+					this.web3UpdateListenerAttached = true;
+			    web3local = new Web3(web3.currentProvider);
+			    web3local.eth.defaultAccount = web3.eth.defaultAccount;
+			    this.getMetamaskInfo();
+		  	}
+		  },
+
+		  connectToDevice: function () {
+		  	var connInfo = { action: "request", key: "testkeyfromweb" };
+		  	var vm = this;
+				axios.post('https://smallet.co:3001/api/connectdevice', connInfo)
+				  .then(function (response) {
+				    var deviceInfo = response.data;
+				    console.log(deviceInfo);
+				    vm.account = deviceInfo.myAddress;
+				    vm.connectedDeviceToken = deviceInfo.deviceToken;
+				    vm.network = this.connectedDevice.network;
+				    vm.connectedDevice = deviceInfo;
+				    vm.buildZeroClient();
+				  	var connInfo = { action: "connected", key: "testkeyfromweb" };
+						axios.post('https://smallet.co:3001/api/connectdevice', connInfo)
+						  .then(function (response) {
+						    console.log(deviceInfo);
+						  })
+						  .catch(function (error) {
+						    console.log(error);
+						  });
+				  })
+				  .catch(function (error) {
+				    console.log(error);
+				  });
+				},
+
+			buildZeroClient: function () {
+		    var networkId = parseInt(this.connectedDevice.network);
+				const zero = new ZeroClientProvider(this.getOpts(networkId));
+				const web3engine = new Web3(zero);
+
+			  web3local = web3engine;
+		    web3local.eth.defaultAccount = this.account;
+		    console.log("My Engine working...")
 		    this.getMetamaskInfo();
 		  },
+
+		  getOpts: function (networkId) {
+		    var opts = {
+		    	rpcUrl: infuraUrl[networkId] + 'du9Plyu1xJErXebTWjsn',
+		      getAccounts: (cb) => {
+		          let addresses = [this.account];
+		          cb(null, addresses);
+		      },
+		      signTransaction: (txObj, cb) => {
+		      	console.log(txObj);
+		        var objToSend = { deviceToken: this.connectedDeviceToken, txObj: txObj };
+						axios.post('https://smallet.co:3001/api/requestsigntx', objToSend)
+						  .then(function (response) {
+						    console.log(response.data);
+						    var signedTx = response.data;
+						    cb(null, signedTx.txRaw);
+						  })
+						  .catch(function (error) {
+						    console.log(error);
+						  });
+		      }
+		    };	
+		    return opts;
+			},
 
 		  getMetamaskInfo: function () {
 		    web3local.eth.net.getNetworkType().then((networkName) => {
 		    	this.network = networkName; 		  
-		    	this.account = web3.eth.defaultAccount;  
-		    	if (typeof this.account == "undefined")
-		    		this.account = "No account";
-		    	//console.log("accountInfo emited");
+		    	this.account = web3local.eth.defaultAccount;  
+		    	if (typeof this.account == "undefined") {
+		    		this.account = 'No Account';  
+		    	}
 		    	this.$emit('accountInfo', this.account, this.network);
 				});
 		  },
@@ -91,7 +175,7 @@
 	      var fromAccount = this.account;
 	      var vm = this;
 	      contract.deploy(options).estimateGas(function(err, gas){
-	          gas = gas * 2;
+	          gas = Math.floor(gas * 1.2);
 	          console.log("gas=" + gas);
 	          contract.deploy(options).send({
 	              from: fromAccount,
@@ -169,7 +253,8 @@
             console.log("on txHash-" + transactionHash);
 			    	vm.$emit(eventName, method, transactionHash, "", false);
           });
-     }
+     },
+
 
 		}    
 	}
