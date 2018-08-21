@@ -3,11 +3,15 @@
 		<header>
 			<div class="d-flex bd-highlight" style="margin-bottom: 1em">
 			  <div class="p-2 flex-grow-1 bd-highlight border border-primary">
-					<span v-if="account=='No account'">Connect to metamask</span>
-			  	<span v-else>{{ network }}: {{ account }} </span>
+					<span v-if="account=='No Account'">Connect to Metamask or Smallet</span>
+			  	<span v-else>
+		        <img v-if="wallet=='Metamask'" src="../assets/metamask.svg" width="25" height="25" alt=""/>
+		        <img v-else src="../assets/smallet_icon.svg" width="25" height="25" alt=""/>
+			  		{{ networkName }}: {{ account }}
+			  	</span>
 			  </div>
 				<button type="button" class="btn btn-outline-primary" style="margin-left: 5px" data-toggle="modal" data-target="#connectionDialog">
-			    <span>Connect</span>
+			    <span>Smallet</span>
 			  </button>			  
 			</div>
 
@@ -71,6 +75,8 @@
 		    deviceConnectionKey: this.uuid4(),
 		    connectedDevice: connectedDeviceStorage.fetch(),
 		    network: '',
+		    networkName: '',
+		    wallet:'',
 		    web3UpdateListenerAttached: false,
 		    visibility: 'all'
 		  }
@@ -86,7 +92,6 @@
 	  },
 
 	  created() {
-      this.initWeb3();
     },
 
     mounted() {
@@ -100,7 +105,9 @@
   				size: 300, 
 			  });
 			  vm.connectToDevice();
-			})
+			});
+			var vm = this;
+			setTimeout(function(){ vm.initWeb3() }, 1000);
     },
 
 		beforeDestroy() {
@@ -114,26 +121,31 @@
 
 		  initWeb3: function () {
 				console.log("initWeb3 called");
-		    if (typeof web3 == 'undefined' || typeof web3.eth.defaultAccount == 'undefined') {
-		    	if (typeof this.connectedDevice.myAddress != 'undefined') {
-		    		this.account = this.connectedDevice.myAddress;
-		    		this.connectedDeviceToken = this.connectedDevice.deviceToken;
-		    		this.network = this.connectedDevice.network;
-		    		this.buildZeroClient();
-		    	} else
-		    		this.account = "No Account";
-		    } else {
+				if (typeof web3 != 'undefined' && typeof web3.eth.defaultAccount != 'undefined') {
+	    		console.log("metamask connected");
 			    var vm = this;
 			    if (!this.web3UpdateListenerAttached)
 						web3.currentProvider.publicConfigStore.on('update', function(data) {
 							//console.log("metamask updated");
-							vm.getMetamaskInfo();
+							//vm.initWeb3();
 						});
 					this.web3UpdateListenerAttached = true;
 			    web3local = new Web3(web3.currentProvider);
 			    web3local.eth.defaultAccount = web3.eth.defaultAccount;
 			    this.getMetamaskInfo();
-		  	}
+			    this.wallet = "Metamask";
+	    	} else {
+	    		console.log("no metamask, start my engine");
+		    	if (typeof this.connectedDevice.myAddress != 'undefined') {
+		    		this.account = this.connectedDevice.myAddress;
+		    		this.connectedDeviceToken = this.connectedDevice.deviceToken;
+		    		this.network = this.connectedDevice.network;
+		    		this.buildZeroClient();
+				    this.wallet = "Smallet";
+		    	} else
+		    		this.account = "No Account";
+	    	}
+	    	this.$emit('web3InitCompleted');
 		  },
 
 		  connectToDevice: function () {
@@ -174,7 +186,7 @@
 
 			  web3local = web3engine;
 		    web3local.eth.defaultAccount = this.account;
-		    console.log("My Engine working...")
+		    console.log("My Engine started...")
 		    this.getMetamaskInfo();
 		  },
 
@@ -208,7 +220,7 @@
 
 		  getMetamaskInfo: function () {
 		    web3local.eth.net.getNetworkType().then((networkName) => {
-		    	this.network = networkName; 		  
+		    	this.networkName = networkName; 		  
 		    	this.account = web3local.eth.defaultAccount;  
 		    	if (typeof this.account == "undefined") {
 		    		this.account = 'No Account';  

@@ -65,6 +65,11 @@
 			    		{{ contract.contractAddress }}
 			    	</a>
 			   	</small></p>
+			    <p class="card-text"><small>
+			    	<a :href="networkToEtherscanUrl(contract.network) + 'address/' + contract.creator" target="_blank">
+			    		{{ contract.creator }}
+			    	</a>
+			   	</small></p>
 			    <div class="card-body">
 				    <button class="btn btn-outline-primary" style="width: 6em" @click="manageContract(contract)">{{ $t('run') }}</button>
 				    <button class="btn btn-outline-primary" style="width: 6em" @click="removeContract(contract)">{{ $t('delete') }}</button>
@@ -78,6 +83,7 @@
 
 <script>
 	import Web3Compo from '@/components/Web3'
+	const etherscanUrl = ["https://etherscan.io/", "https://ropsten.etherscan.io/", "https://kovan.etherscan.io/", "https://rinkeby.etherscan.io/"];
 
 	// localStorage persistence
 	var STORAGE_KEY = 'token-contracts-v1'
@@ -152,10 +158,7 @@
 
 	  methods: {
 	  	networkToEtherscanUrl(network) {
-	  		if (network == 'main')
-	  			return "https://etherscan.io/";
-	  		else
-	  			return "https://" + network + ".etherscan.io/";
+	  		return etherscanUrl[network];
 	  	},
 
     	accountInfo(accountInfo, network) {
@@ -210,6 +213,7 @@
           tokenSymbol: this.symbol,
           tokenDecimals: this.decimals,
           contractAddress: contractAddress,
+          creator: this.account,
           network: this.network
         })
 
@@ -240,7 +244,7 @@
 <style>
 .jumbotron
 {
-    background: url('./img/ethereum.jpg') no-repeat center center; 
+    background: url('./img/antique-black-and-white-clock-210590.jpg') no-repeat center center; 
     background-size: cover;
     color: #fff;    
 }	

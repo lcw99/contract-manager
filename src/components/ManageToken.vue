@@ -5,7 +5,9 @@
 			  <h1 class="display-5">{{ $t('jumbo-title-manage-token') }}</h1>
 			  <p class="lead">{{ $t('jumbo-text-manage-token') }}</p>
 			</div>
-			<web3compo ref="web3Compo" @accountInfo="accountInfo" @callResult="callResult" @sendTxResult="sendTxResult" @signRequestError="signRequestError"/>
+			<web3compo ref="web3Compo" 
+				@accountInfo="accountInfo" @callResult="callResult" @web3InitCompleted="web3InitCompleted"
+				@sendTxResult="sendTxResult" @signRequestError="signRequestError"/>
 			<div class="dropdown">
 			  <a class="btn btn-primary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 			    {{ contract.tokenName }} - {{ contract.contractAddress }}
@@ -30,6 +32,12 @@
 			    		{{ contract.contractAddress }}
 			    	</a>
 			    	<span class="badge badge-info">Contarct Address</span>
+			    </li>
+			    <li class="list-group-item">
+			    	<a :href="networkToEtherscanUrl(contract.network) + 'address/' + owner" target="_blank">
+			    		{{ owner }}
+			    	</a>
+			    	<span class="badge badge-info">Owner</span>
 			    </li>
 			    <li class="list-group-item">{{ tokenSupply }} <span class="badge badge-info">Total Supply</span></li>
 			    <li class="list-group-item">{{ accountBalance }} <span class="badge badge-info">Account Balance</span></li>
@@ -135,6 +143,7 @@
 	import Web3Compo from '@/components/Web3'
 	var bigdecimal = require("bigdecimal");
 	var $ = require('jquery');
+	const etherscanUrl = ["https://etherscan.io/", "https://ropsten.etherscan.io/", "https://kovan.etherscan.io/", "https://rinkeby.etherscan.io/"];
 
 	var STORAGE_KEY = 'token-contracts-v1'
 	var contractStorage = {
@@ -168,6 +177,7 @@
 		    transferTo: '',
 		    transferAmount: '',
 		    accountBalance: '0',
+		    owner: '',
 		    hashUrl: '',
 		    txMessage: '',
 		    visibility: 'all'
@@ -192,15 +202,16 @@
 		},
 
     mounted() {
-      this.fetchData();
     },
 
     methods: {
+    	web3InitCompleted() {
+  	  	var vm = this;
+				setTimeout(function(){ vm.fetchData() }, 500);
+    	},
+
 	  	networkToEtherscanUrl(network) {
-	  		if (network == 'main')
-	  			return "https://etherscan.io/";
-	  		else
-	  			return "https://" + network + ".etherscan.io/";
+	  		return etherscanUrl[network];
 	  	},
 
     	accountInfo(accountInfo, network) {
@@ -218,13 +229,15 @@
 	    		this.tokenSupply = this.getAmountDivDecimals(result);
 		   	} else if (method == "balanceOf") {
 		   		this.accountBalance = this.getAmountDivDecimals(result);
+		   	} else if (method == "owner") {
+		   		this.owner = '0x' + result.replace('0x', '').replace(/^0+/, '');
 		   	}
       },
 
     	sendTxResult(method, transactionHash, txMessage, completed) {
     		console.log("sendTxResult=" + transactionHash + "," + txMessage);
     		if (transactionHash != "")
-    			this.hashUrl = "https://" + this.network + ".etherscan.io/tx/" + transactionHash;
+    			this.hashUrl = "https://" + this.networkName + ".etherscan.io/tx/" + transactionHash;
     		if (txMessage != "")
     			this.txMessage = txMessage;
     		if (completed) {
@@ -240,6 +253,7 @@
       fetchData() {
       	this.contract = this.contracts[parseInt(this.$route.params.id)];
       	this.getTotalSupply();
+      	this.getOwner();
 	      if (this.account != '')
 		     	this.getBalanceOf();
 		    if (this.env == 'development') {
@@ -256,6 +270,11 @@
       getBalanceOf: function() {
       	this.$refs.web3Compo.callContractMethod(this.contract.contractAddress, "balanceOf", [this.account]);
 	    	//this.$emit('callContractMethod', this.contract.contractAddress, "balanceOf", [this.account]);
+      },
+
+      getOwner: function() {
+      	this.$refs.web3Compo.callContractMethod(this.contract.contractAddress, "owner", []);
+	    	//this.$emit('callContractMethod', this.contract.contractAddress, "totalSupply", []);
       },
 
       getAmountMulDecimals: function (amount) {
@@ -320,7 +339,7 @@
 <style>
 .jumbotron
 {
-    background: url('./img/ethereum.jpg') no-repeat center center; 
+    background: url('./img/antique-black-and-white-clock-210590.jpg') no-repeat center center; 
     background-size: cover;
     color: #fff;    
 }	
