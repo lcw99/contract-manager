@@ -5,7 +5,7 @@
 			  <h1 class="display-5">{{ $t('jumbo-title-manage-token') }}</h1>
 			  <p class="lead">{{ $t('jumbo-text-manage-token') }}</p>
 			</div>
-			<web3compo ref="web3Compo" @accountInfo="accountInfo" @callResult="callResult" @sendTxResult="sendTxResult"></web3compo>
+			<web3compo ref="web3Compo" @accountInfo="accountInfo" @callResult="callResult" @sendTxResult="sendTxResult" @signRequestError="signRequestError"/>
 			<div class="dropdown">
 			  <a class="btn btn-primary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 			    {{ contract.tokenName }} - {{ contract.contractAddress }}
@@ -232,6 +232,10 @@
 	      	this.getBalanceOf();
     		}
       },
+
+      signRequestError(error) {
+    		this.txMessage = "Sign request error: " + error;
+    	},
 
       fetchData() {
       	this.contract = this.contracts[parseInt(this.$route.params.id)];

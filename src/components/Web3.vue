@@ -6,10 +6,35 @@
 					<span v-if="account=='No account'">Connect to metamask</span>
 			  	<span v-else>{{ network }}: {{ account }} </span>
 			  </div>
-				<button type="button" class="btn btn-outline-primary" style="margin-left: 5px" @click="connectToDevice">
+				<button type="button" class="btn btn-outline-primary" style="margin-left: 5px" data-toggle="modal" data-target="#connectionDialog">
 			    <span>Connect</span>
 			  </button>			  
 			</div>
+
+			<div class="modal fade" id="connectionDialog" tabindex="-1" role="dialog" aria-labelledby="connectionDialog" aria-hidden="true">
+			  <div class="modal-dialog modal-dialog-centered" role="document">
+			    <div class="modal-content">
+			      <div class="modal-header">
+			        <h5 class="modal-title" id="connectToDeviceModal">Connect To Smallet</h5>
+			        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+			          <span aria-hidden="true">&times;</span>
+			        </button>
+			      </div>
+			      <div class="modal-body d-flex justify-content-center">
+			      	<div>
+			        	<canvas id="qr"></canvas>
+			      	</div>
+			      </div>
+			      <div class="modal-footer">
+			        <div class="alert alert-primary" role="alert">
+  							Connection Process Started, read QR code from your Smallet App.<br/>
+  							App>Menu>Wallet Connect.
+							</div>
+			      </div>
+			    </div>
+			  </div>
+			</div>
+
 		</header>
 	</div>
 </template>
@@ -19,8 +44,11 @@
 	import axios from 'axios'
 	import { generalTokenAbi, generalTokenCode } from './generalToken.js'
 	import ZeroClientProvider from 'web3-provider-engine/zero.js'
+	var $ = require('jquery');
+	var QRious = require('qrious');
 
 	const infuraUrl = ["https://mainnet.infura.io/", "https://ropsten.infura.io/", "https://kovan.infura.io/", "https://rinkeby.infura.io/"];
+	const chainId = [1, 3, 42, 4];
 	var web3local = null;
 
 	var STORAGE_KEY = 'connected-device-v1'
@@ -40,6 +68,7 @@
 	  data() {
 	  	return {
 		    account: '',
+		    deviceConnectionKey: this.uuid4(),
 		    connectedDevice: connectedDeviceStorage.fetch(),
 		    network: '',
 		    web3UpdateListenerAttached: false,
@@ -60,15 +89,29 @@
       this.initWeb3();
     },
 
+    mounted() {
+    	var vm = this;
+			$('#connectionDialog').on('shown.bs.modal', function (e) {
+				console.log("dialog open=" + vm.deviceConnectionKey);
+			  var qr = new QRious({ 
+			  	element: document.getElementById('qr'),
+			  	value: vm.deviceConnectionKey,
+			  	padding: 25,
+  				size: 300, 
+			  });
+			  vm.connectToDevice();
+			})
+    },
+
 		beforeDestroy() {
-			/*
-			this.$off('callContractMethod');
-			this.$off('sendContractMethod');
-			this.$off('createContract');
-			*/
 		},
 
     methods: {
+    	uuid4: function () {
+				return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+				    (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16));
+    	},
+
 		  initWeb3: function () {
 				console.log("initWeb3 called");
 		    if (typeof web3 == 'undefined' || typeof web3.eth.defaultAccount == 'undefined') {
@@ -94,7 +137,7 @@
 		  },
 
 		  connectToDevice: function () {
-		  	var connInfo = { action: "request", key: "testkeyfromweb" };
+		  	var connInfo = { action: "request", key: this.deviceConnectionKey };
 		  	var vm = this;
 				axios.post('https://smallet.co:3001/api/connectdevice', connInfo)
 				  .then(function (response) {
@@ -102,13 +145,18 @@
 				    console.log(deviceInfo);
 				    vm.account = deviceInfo.myAddress;
 				    vm.connectedDeviceToken = deviceInfo.deviceToken;
-				    vm.network = this.connectedDevice.network;
+				    vm.network = deviceInfo.network;
 				    vm.connectedDevice = deviceInfo;
 				    vm.buildZeroClient();
-				  	var connInfo = { action: "connected", key: "testkeyfromweb" };
+				  	var connInfo = { 
+				  		action: "connected", 
+				  		key: vm.deviceConnectionKey,
+				  		serviceName: document.title
+				  	};
 						axios.post('https://smallet.co:3001/api/connectdevice', connInfo)
 						  .then(function (response) {
 						    console.log(deviceInfo);
+						    $('#connectionDialog').modal('hide');
 						  })
 						  .catch(function (error) {
 						    console.log(error);
@@ -144,10 +192,14 @@
 						  .then(function (response) {
 						    console.log(response.data);
 						    var signedTx = response.data;
-						    cb(null, signedTx.txRaw);
+						    if (signedTx.result == 'true')
+						    	cb(null, signedTx.txRaw);
+						    else
+						    	cb("sign rejected or transaction error", "");
 						  })
 						  .catch(function (error) {
 						    console.log(error);
+					    	vm.$emit('signRequestError', error);
 						  });
 		      }
 		    };	
@@ -238,24 +290,27 @@
       sendContractMethod: function (contractAddress, method, params) {
 		    var vm = this;
 		    var methodABI = this.encodeMethod(contractAddress, method, params);
-		    var txObj = { from: this.account, to: contractAddress, data: methodABI };
+		    var txObj = { from: this.account, to: contractAddress, data: methodABI, gas: '200000' };
 		    var eventName = "sendTxResult";
-		    web3local.eth.sendTransaction(txObj)
-    			.on('receipt', function(receipt) {
-    				//console.log(receipt);
-			    	vm.$emit(eventName, method, receipt.transactionHash, method + " completed.", true);
-    			})
-          .on('error', function(error){ 
-            console.log(error);
-			    	vm.$emit(eventName, method, "", "" + error, false);
-          })
-          .on('transactionHash', function(transactionHash){ 
-            console.log("on txHash-" + transactionHash);
-			    	vm.$emit(eventName, method, transactionHash, "", false);
-          });
-     },
+		    web3local.eth.estimateGas(txObj).then(function (gasEst) {
+		    	console.log("gasEst=" + gasEst);
+		    	txObj.gas = gasEst;
+			    web3local.eth.sendTransaction(txObj)
+	    			.on('receipt', function(receipt) {
+	    				//console.log(receipt);
+				    	vm.$emit(eventName, method, receipt.transactionHash, method + " completed.", true);
+	    			})
+	          .on('error', function(error){ 
+	            console.log(error);
+				    	vm.$emit(eventName, method, "", "" + error, false);
+	          })
+	          .on('transactionHash', function(transactionHash){ 
+	            console.log("on txHash-" + transactionHash);
+				    	vm.$emit(eventName, method, transactionHash, "", false);
+            });
+	      });
 
-
+	    },
 		}    
 	}
 </script>

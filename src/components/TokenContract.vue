@@ -5,7 +5,7 @@
 		  <h1 class="display-5">{{ $t('jumbo-title-create-token') }}</h1>
 		  <p class="lead">{{ $t('jumbo-text-create-token') }}</p>
 		</div>
-		<web3compo ref="web3Compo" @accountInfo="accountInfo" @createContractResult="createContractResult"></web3compo>
+		<web3compo ref="web3Compo" @accountInfo="accountInfo" @createContractResult="createContractResult" @signRequestError="signRequestError"/>
 		<div class="input-group mb-3">
 		  <div class="input-group-prepend">
 		    <span class="input-group-text" id="basic-addon1">N</span>
@@ -174,6 +174,10 @@
   				this.addContract(contractAddress);
   			}
       },
+
+      signRequestError(error) {
+    		this.txMessage = "Sign request error: " + error;
+    	},
 
 	  	setupTestData: function () {
 		    if (this.env == 'development') {
