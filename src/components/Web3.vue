@@ -143,21 +143,21 @@
 					this.web3UpdateListenerAttached = true;
 			    web3local = new Web3(web3.currentProvider);
 			    web3local.eth.defaultAccount = web3.eth.defaultAccount;
-			    this.getMetamaskInfo();
 			    this.wallet = "Metamask";
+			    this.getMetamaskInfo();
+			    window.web3local = web3local;
 	    	} else {
 	    		console.log("no metamask, start my engine");
 		    	if (typeof this.connectedDevice.myAddress != 'undefined') {
 		    		this.account = this.connectedDevice.myAddress;
 		    		this.connectedDeviceToken = this.connectedDevice.deviceToken;
 		    		this.network = this.connectedDevice.network;
-		    		this.buildZeroClient();
 				    this.wallet = "Smallet";
+		    		this.buildZeroClient();
+				    this.getMetamaskInfo();
 		    	} else
 		    		this.account = "No Account";
 	    	}
-	    	this.$emit('web3InitCompleted');
-	    	this.getEthBalance();
 		  },
 
 		  getEthBalance: function () {
@@ -209,7 +209,6 @@
 			  web3local = web3engine;
 		    web3local.eth.defaultAccount = this.account;
 		    console.log("My Engine started...")
-		    this.getMetamaskInfo();
 		  },
 
 		  getOpts: function (networkId) {
@@ -250,6 +249,8 @@
 		    	if (typeof this.account == "undefined") {
 		    		this.account = 'No Account';  
 		    	}
+		    	this.$emit('web3InitCompleted');
+		    	this.getEthBalance();
 		    	this.$emit('accountInfo', this.account, this.network);
 				});
 		  },
