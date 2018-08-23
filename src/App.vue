@@ -18,6 +18,9 @@
             <router-link class="nav-link" active-class="active" to="/manage-token">{{ $t('menu-manage-token') }}</router-link>
           </li>
           <li class="nav-item">
+            <router-link class="nav-link" active-class="active" to="/send-ether">{{ $t('send-ether') }}</router-link>
+          </li>
+          <li class="nav-item">
             <router-link class="nav-link" active-class="active" to="/about">About</router-link>
           </li>
         </ul>  
@@ -50,12 +53,15 @@
   import 'bootstrap/dist/css/bootstrap.css'
   import 'bootstrap/dist/js/bootstrap.min.js'
 
+  const etherscanUrl = ["https://etherscan.io/", "https://ropsten.etherscan.io/", "https://kovan.etherscan.io/", "https://rinkeby.etherscan.io/"];
+
   export default {
     name: 'App',
     data() {
       return {
         env: process.env.NODE_ENV,
-        locale: 'en'
+        locale: 'en',
+        etherscanUrl: ["https://etherscan.io/", "https://ropsten.etherscan.io/", "https://kovan.etherscan.io/", "https://rinkeby.etherscan.io/"]
       }
     },
 

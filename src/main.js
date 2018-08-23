@@ -12,4 +12,5 @@ new Vue({
   components: { App },
   i18n,
   template: '<App/>'
-})
+});
+

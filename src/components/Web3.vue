@@ -1,19 +1,24 @@
 <template>
 	<div>
 		<header>
-			<div class="d-flex bd-highlight" style="margin-bottom: 1em">
+			<div class="d-flex bd-highlight" style="margin-bottom: 0.1em">
 			  <div class="p-2 flex-grow-1 bd-highlight border border-primary">
 					<span v-if="account=='No Account'">Connect to Metamask or Smallet</span>
 			  	<span v-else>
 		        <img v-if="wallet=='Metamask'" src="../assets/metamask.svg" width="25" height="25" alt=""/>
 		        <img v-else src="../assets/smallet_icon.svg" width="25" height="25" alt=""/>
-			  		{{ networkName }}: {{ account }}
+			  		{{ networkName }} {{ account }}
 			  	</span>
 			  </div>
 				<button type="button" class="btn btn-outline-primary" style="margin-left: 5px" data-toggle="modal" data-target="#connectionDialog">
-			    <span>Smallet</span>
+			    <span v-if="!connectedDevice.model">Connect to Smallet</span> 
+			    <span v-else>Connected to {{ connectedDevice.model }}</span>
 			  </button>			  
 			</div>
+			<div class="d-flex bd-highlight" style="margin-bottom: 1em">
+				Ether balance: {{ etherBalance }}
+			</div>
+
 
 			<div class="modal fade" id="connectionDialog" tabindex="-1" role="dialog" aria-labelledby="connectionDialog" aria-hidden="true">
 			  <div class="modal-dialog modal-dialog-centered" role="document">
@@ -32,7 +37,8 @@
 			      <div class="modal-footer">
 			        <div class="alert alert-primary" role="alert">
   							Connection Process Started, read QR code from your Smallet App.<br/>
-  							App>Menu>Wallet Connect.
+  							App>Menu>Wallet Connect.<br/>
+  							<a href="https://play.google.com/store/apps/details?id=co.smallet.wallet" target="_blank">Ethereum Smallet Download</a>
 							</div>
 			      </div>
 			    </div>
@@ -77,6 +83,7 @@
 		    network: '',
 		    networkName: '',
 		    wallet:'',
+		    etherBalance: '0',
 		    web3UpdateListenerAttached: false,
 		    visibility: 'all'
 		  }
@@ -101,7 +108,7 @@
 			  var qr = new QRious({ 
 			  	element: document.getElementById('qr'),
 			  	value: vm.deviceConnectionKey,
-			  	padding: 25,
+			  	padding: 10,
   				size: 300, 
 			  });
 			  vm.connectToDevice();
@@ -114,6 +121,10 @@
 		},
 
     methods: {
+    	networkToEtherscanUrl: function (network) {
+    		return etherscanUrl[network];
+    	},
+
     	uuid4: function () {
 				return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
 				    (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16));
@@ -146,6 +157,16 @@
 		    		this.account = "No Account";
 	    	}
 	    	this.$emit('web3InitCompleted');
+	    	this.getEthBalance();
+		  },
+
+		  getEthBalance: function () {
+		  	if (!web3local)
+		  		return;
+		  	var vm = this;
+		  	web3local.eth.getBalance(this.account).then((balance) => {
+		  		vm.etherBalance = web3local.utils.fromWei(balance, 'ether');
+		  	});
 		  },
 
 		  connectToDevice: function () {
@@ -169,6 +190,7 @@
 						  .then(function (response) {
 						    console.log(deviceInfo);
 						    $('#connectionDialog').modal('hide');
+						    vm.initWeb3();
 						  })
 						  .catch(function (error) {
 						    console.log(error);
@@ -198,7 +220,10 @@
 		          cb(null, addresses);
 		      },
 		      signTransaction: (txObj, cb) => {
+		      	console.log("hooked wallet called...");
 		      	console.log(txObj);
+		      	var vm = this;
+			    	vm.$emit('signRequestToHookedWallet', "Request sent to device, check connected device.");
 		        var objToSend = { deviceToken: this.connectedDeviceToken, txObj: txObj };
 						axios.post('https://smallet.co:3001/api/requestsigntx', objToSend)
 						  .then(function (response) {
@@ -227,6 +252,33 @@
 		    	}
 		    	this.$emit('accountInfo', this.account, this.network);
 				});
+		  },
+
+		  sendEther: function (toAddress, ethAmount) {
+		  	var weiAmount = web3local.utils.toWei(ethAmount, 'ether');
+		  	var txObj = { 
+		  		from: this.account,
+		  		to: toAddress,
+		  		value: weiAmount
+		  	}
+		  	console.log(txObj);
+		  	var vm = this;
+		  	web3local.eth.sendTransaction(txObj)
+          .on('error', function(error){ 
+            console.log(error);
+			    	vm.$emit('sendEtherResult', "", "" + error, "");
+          })
+          .on('transactionHash', function(transactionHash){ 
+            console.log("on txHash-" + transactionHash);
+			    	vm.$emit('sendEtherResult', transactionHash, "", "");
+          })
+          .on('receipt', function(receipt){
+            console.log("onreceipt=" + receipt.to); 
+			    	vm.$emit('sendEtherResult', receipt.transactionHash, "Send ether completed.", receipt.to);
+          })
+          .on('confirmation', function(confirmationNumber, receipt) { 
+            console.log("on confirmation=" + confirmationNumber) 
+          })
 		  },
 
 	    createContract: function(name, symbol, decimals) {

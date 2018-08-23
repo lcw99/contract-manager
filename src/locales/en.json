@@ -8,11 +8,13 @@
   "jumbo-text-create-token": "Publish your own ERC20 token contract, easy and fast.",
   "jumbo-title-manage-token": "Manage Your Token",
   "jumbo-text-manage-token": "Run your token contracts.",
+  "jumbo-title-send-ether": "Transfer ether",
   "tab-mint": "Mint",
   "tab-transfer": "Transfer",
   "mint-token": "Mint Token",
   "transfer-token": "Transfer Token",
   "run": "Run",
   "delete": "Delete",
+  "send-ether": "Send Ether",
   "last":"last"
 }

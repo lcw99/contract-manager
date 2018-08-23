@@ -7,7 +7,7 @@
 			</div>
 			<web3compo ref="web3Compo" 
 				@accountInfo="accountInfo" @callResult="callResult" @web3InitCompleted="web3InitCompleted"
-				@sendTxResult="sendTxResult" @signRequestError="signRequestError"/>
+				@sendTxResult="sendTxResult" @signRequestError="signRequestError" @signRequestToHookedWallet="signRequestToHookedWallet"/>
 			<div class="dropdown">
 			  <a class="btn btn-primary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 			    {{ contract.tokenName }} - {{ contract.contractAddress }}
@@ -121,6 +121,12 @@
 
 			    <transition name="bounce">
 						<div class="alert alert-info alert-dismissible fade show" role="alert" style="margin-top: 20px" 
+							v-show="hookedWalletMessage" >
+						  {{ hookedWalletMessage }}
+						</div>			
+					</transition>
+			    <transition name="bounce">
+						<div class="alert alert-info alert-dismissible fade show" role="alert" style="margin-top: 20px" 
 							v-show="hashUrl" >
 						  <a :href="hashUrl" target="_blank" rel="noopener noreferrer">Transfer started, view transaction in etherscan</a>
 						</div>			
@@ -141,9 +147,9 @@
 
 <script>
 	import Web3Compo from '@/components/Web3'
+	const etherscanUrl = ["https://etherscan.io/", "https://ropsten.etherscan.io/", "https://kovan.etherscan.io/", "https://rinkeby.etherscan.io/"];
 	var bigdecimal = require("bigdecimal");
 	var $ = require('jquery');
-	const etherscanUrl = ["https://etherscan.io/", "https://ropsten.etherscan.io/", "https://kovan.etherscan.io/", "https://rinkeby.etherscan.io/"];
 
 	var STORAGE_KEY = 'token-contracts-v1'
 	var contractStorage = {
@@ -180,6 +186,7 @@
 		    owner: '',
 		    hashUrl: '',
 		    txMessage: '',
+		    hookedWalletMessage: '',
 		    visibility: 'all'
 		  }
 	  },
@@ -204,6 +211,12 @@
     mounted() {
     },
 
+	  computed: {
+	  	etherscanUrl: function () {
+	  		return etherscanUrl[this.network];
+	  	}
+	  },
+
     methods: {
     	web3InitCompleted() {
   	  	var vm = this;
@@ -223,6 +236,10 @@
     		this.network = network;
       },
 
+      signRequestToHookedWallet(message) {
+      	this.hookedWalletMessage = message;
+      },
+
     	callResult(method, result) { 
     		console.log(method + " callResult=" + result);
     		if (method == "totalSupply") {
@@ -237,7 +254,7 @@
     	sendTxResult(method, transactionHash, txMessage, completed) {
     		console.log("sendTxResult=" + transactionHash + "," + txMessage);
     		if (transactionHash != "")
-    			this.hashUrl = "https://" + this.networkName + ".etherscan.io/tx/" + transactionHash;
+    			this.hashUrl = this.etherscanUrl + "tx/" + transactionHash;
     		if (txMessage != "")
     			this.txMessage = txMessage;
     		if (completed) {

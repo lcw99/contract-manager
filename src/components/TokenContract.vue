@@ -5,7 +5,8 @@
 		  <h1 class="display-5">{{ $t('jumbo-title-create-token') }}</h1>
 		  <p class="lead">{{ $t('jumbo-text-create-token') }}</p>
 		</div>
-		<web3compo ref="web3Compo" @accountInfo="accountInfo" @createContractResult="createContractResult" @signRequestError="signRequestError"/>
+		<web3compo ref="web3Compo" @accountInfo="accountInfo" @createContractResult="createContractResult" 
+			@signRequestError="signRequestError" @signRequestToHookedWallet="signRequestToHookedWallet"/>
 		<div class="input-group mb-3">
 		  <div class="input-group-prepend">
 		    <span class="input-group-text" id="basic-addon1">N</span>
@@ -36,6 +37,12 @@
     <button @click="createContract" class="btn btn-outline-primary btn-lg" :disabled="account==='No account'">
       {{ $t('menu-create-token') }}
     </button>
+    <transition name="bounce">
+			<div class="alert alert-info alert-dismissible fade show" role="alert" style="margin-top: 20px" 
+				v-show="hookedWalletMessage" >
+			  {{ hookedWalletMessage }}
+			</div>			
+		</transition>
     <transition name="bounce">
 			<div class="alert alert-info alert-dismissible fade show" role="alert" style="margin-top: 20px" 
 				v-show="hashUrl">
@@ -83,6 +90,7 @@
 
 <script>
 	import Web3Compo from '@/components/Web3'
+	import {globalStore} from '../main.js'
 	const etherscanUrl = ["https://etherscan.io/", "https://ropsten.etherscan.io/", "https://kovan.etherscan.io/", "https://rinkeby.etherscan.io/"];
 
 	// localStorage persistence
@@ -124,6 +132,7 @@
 		    hashUrl: '',
 		    txMessage: '',
 		    editedContract: null,
+		    hookedWalletMessage: '',
 		    visibility: 'all'
 		  }
 	  },
@@ -149,10 +158,9 @@
 	    }
 	  },
 
-
 	  computed: {
 	  	etherscanUrl: function () {
-	  		return this.networkToEtherscanUrl(this.network);
+	  		return etherscanUrl[this.network];
 	  	}
 	  },
 
@@ -167,9 +175,13 @@
     		this.network = network;
       },
 
+      signRequestToHookedWallet(message) {
+      	this.hookedWalletMessage = message;
+      },
+
     	createContractResult(transactionHash, txMessage, contractAddress) {
     		if (transactionHash != "") 
-    			this.hashUrl = "https://" + this.network + ".etherscan.io/tx/" + transactionHash;
+    			this.hashUrl = this.etherscanUrl + "/tx/" + transactionHash;
     		if (txMessage != "") 
     			this.txMessage = txMessage;
   			if (contractAddress != "") {

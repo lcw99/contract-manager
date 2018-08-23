@@ -8,11 +8,14 @@
   "jumbo-text-create-token": "자신만의 ERC20 토큰을 쉽고 빠르게 만들어 보세요.",
   "jumbo-title-manage-token": "토큰 관리 하기",
   "jumbo-text-manage-token": "토큰 컨트랙트 실행 해보기.",
+  "jumbo-title-send-ether": "이더리움 전송하기",
+  "jumbo-text-send-ether": "선택한 주소로 이더리움 전송",
   "tab-mint": "주조",
   "tab-transfer": "전송",
   "mint-token": "토큰 주조",
   "transfer-token": "토큰 전송",
   "run": "실행",
   "delete": "삭제",
+  "send-ether": "이더 전송",
   "last":"last"
 }
