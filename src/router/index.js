@@ -3,7 +3,9 @@ import Router from 'vue-router'
 import TokenContract from '@/components/TokenContract'
 import ManageToken from '@/components/ManageToken'
 import SendEther from '@/components/SendEther'
+import SignMessage from '@/components/SignMessage'
 import About from '@/components/About'
+import GambleSimulator from '@/components/GambleSimulator'
 
 Vue.use(Router)
 
@@ -11,7 +13,7 @@ export default new Router({
   routes: [
     {
       path: '/',
-      redirect: '/token-contract'
+      redirect: '/send-ether'
     },
     {
       path: '/token-contract',
@@ -33,9 +35,19 @@ export default new Router({
       component: SendEther
     },
     {
+      path: '/sign-message/',
+      name: 'SignMessage',
+      component: SignMessage
+    },
+    {
       path: '/about',
       name: 'About',
       component: About
+    },
+    {
+      path: '/gamble',
+      name: 'Gamble',
+      component: GambleSimulator
     },
   ]
 })

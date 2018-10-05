@@ -19,7 +19,6 @@
 				Ether balance: {{ etherBalance }}
 			</div>
 
-
 			<div class="modal fade" id="connectionDialog" tabindex="-1" role="dialog" aria-labelledby="connectionDialog" aria-hidden="true">
 			  <div class="modal-dialog modal-dialog-centered" role="document">
 			    <div class="modal-content">
@@ -77,6 +76,7 @@
 
 	  data() {
 	  	return {
+	  		walletProvider: '',
 		    account: '',
 		    deviceConnectionKey: this.uuid4(),
 		    connectedDevice: connectedDeviceStorage.fetch(),
@@ -133,9 +133,13 @@
 		  initWeb3: function () {
 				console.log("initWeb3 called");
 				if (typeof web3 != 'undefined' && typeof web3.eth.defaultAccount != 'undefined') {
-	    		console.log("metamask connected");
+					if (typeof web3.smallet != 'undefined')
+						this.walletProvider = "Smallet";
+					else
+						this.walletProvider = "Metamask";
+	    		console.log(this.walletProvider + " connected");
 			    var vm = this;
-			    if (!this.web3UpdateListenerAttached)
+			    if (!this.web3UpdateListenerAttached && this.walletProvider == "Metamask")
 						web3.currentProvider.publicConfigStore.on('update', function(data) {
 							//console.log("metamask updated");
 							//vm.initWeb3();
@@ -218,6 +222,27 @@
 		          let addresses = [this.account];
 		          cb(null, addresses);
 		      },
+          signPersonalMessage: (txObj, cb) => {
+            console.log("hooked wallet signPersonalMessage called...");
+            txObj.action = "signMessage";
+            //txObj.action = "signNpki";
+            console.log(txObj); // {from: ..., data: ...}
+            var objToSend = { deviceToken: this.connectedDeviceToken, txObj: txObj };
+            axios.post('https://smallet.co:3001/api/requestsigntx', objToSend)
+              .then(function (response) {
+                console.log(response.data);
+                var signedTx = response.data;
+                if (signedTx.result == 'true')
+                  cb(null, signedTx.txRaw);
+                else {
+                  var error = { message: signedTx.txRaw, stack: "Error:" + signedTx.txRaw + ":no stack" };
+                  cb(error, null);
+                }
+              })
+              .catch(function (error) {
+                console.log(error);
+              });
+          },
 		      signTransaction: (txObj, cb) => {
 		      	console.log("hooked wallet called...");
 		      	console.log(txObj);
@@ -243,19 +268,51 @@
 			},
 
 		  getMetamaskInfo: function () {
+		  	const vm = this;
 		    web3local.eth.net.getNetworkType().then((networkName) => {
-		    	this.networkName = networkName; 		  
-		    	this.account = web3local.eth.defaultAccount;  
-		    	if (typeof this.account == "undefined") {
-		    		this.account = 'No Account';  
+		    	vm.networkName = networkName;
+		    	console.log("networkName=" + vm.networkName)
+		    	switch(vm.networkName) {
+		    		case "main":
+		    		case "mainnet":
+		    			vm.network = 0;
+		    			break;
+		    		case "ropsten":
+		    			vm.network = 1;
+		    			break;
+		    		case "kovan":
+		    			vm.network = 2;
+		    			break;
+		    		case "rinkeby":
+		    			vm.network = 3;
+		    			break;
 		    	}
-		    	this.$emit('web3InitCompleted');
-		    	this.getEthBalance();
-		    	this.$emit('accountInfo', this.account, this.network);
+		    	vm.account = web3local.eth.defaultAccount;  
+		    	if (typeof vm.account == "undefined") {
+		    		vm.account = 'No Account';  
+		    	}
+		    	vm.$emit('web3InitCompleted');
+		    	vm.getEthBalance();
+		    	vm.$emit('accountInfo', vm.account, vm.network);
 				});
 		  },
 
+		  signMessage: function (messageToSign) {
+		  	if (this.walletProvider == "Smallet")
+	    		this.$emit('signRequestToHookedWallet', "Request sent to device, check connected device.");
+		  	web3local.eth.personal.sign(messageToSign, this.account).then((signedMessage) => {
+		  		console.log("signedMessage=");
+		  		console.log(signedMessage);
+		  		this.$emit('signMessageResult', signedMessage);
+		  	}).catch((error) => {                                                                           
+	        console.log(error);                                                                         
+	    		this.$emit('signRequestToHookedWallet', JSON.stringify(error));
+		    });
+		  },
+
 		  sendEther: function (toAddress, ethAmount) {
+		  	if (this.walletProvider == "Smallet")
+	    		this.$emit('signRequestToHookedWallet', "Request sent to device, check connected device.");
 		  	var weiAmount = web3local.utils.toWei(ethAmount, 'ether');
 		  	var txObj = { 
 		  		from: this.account,
@@ -267,7 +324,7 @@
 		  	web3local.eth.sendTransaction(txObj)
           .on('error', function(error){ 
             console.log(error);
-			    	vm.$emit('sendEtherResult', "", "" + error, "");
+			    	vm.$emit('sendEtherResult', "", error, "");
           })
           .on('transactionHash', function(transactionHash){ 
             console.log("on txHash-" + transactionHash);
@@ -283,6 +340,8 @@
 		  },
 
 	    createContract: function(name, symbol, decimals) {
+		  	if (this.walletProvider == "Smallet")
+	    		this.$emit('signRequestToHookedWallet', "Request sent to device, check connected device.");
 	      var contract = new web3local.eth.Contract(generalTokenAbi);
 	      var options = {
 	          data: generalTokenCode,
@@ -353,6 +412,8 @@
       },
 
       sendContractMethod: function (contractAddress, method, params) {
+		  	if (this.walletProvider == "Smallet")
+	    		this.$emit('signRequestToHookedWallet', "Request sent to device, check connected device.");
 		    var vm = this;
 		    var methodABI = this.encodeMethod(contractAddress, method, params);
 		    var txObj = { from: this.account, to: contractAddress, data: methodABI, gas: '200000' };

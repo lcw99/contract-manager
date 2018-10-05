@@ -57,7 +57,7 @@
 
 <script>
 	import Web3Compo from '@/components/Web3'
-	const etherscanUrl = ["https://etherscan.io/", "https://ropsten.etherscan.io/", "https://kovan.etherscan.io/", "https://rinkeby.etherscan.io/"];
+	const _etherscanUrls = ["https://etherscan.io/", "https://ropsten.etherscan.io/", "https://kovan.etherscan.io/", "https://rinkeby.etherscan.io/"];
 
   export default {
 		name: 'SendEther',
@@ -83,12 +83,13 @@
 	  created() {
 	    if (this.env == 'development') {
 	    	this.toAddress = "0x2bC471eF0E259aB41f578A540a45f8f64c598882";
+	    	this.ethAmount = "0.008";
 	    }
 	  },
 
 	  computed: {
 	  	etherscanUrl: function () {
-	  		return etherscanUrl[this.network];
+	  		return _etherscanUrls[this.network];
 	  	}
 	  },
 
@@ -99,6 +100,7 @@
     	accountInfo(accountInfo, network) {
    			this.account = accountInfo;
     		this.network = network;
+    		console.log("network=" + this.network);
       },
 
       sendEther() {
@@ -116,7 +118,10 @@
     		if (transactionHash != "") 
     			this.hashUrl = this.etherscanUrl + "tx/" + transactionHash;
     		if (txMessage != "") 
-    			this.txMessage = txMessage;
+    			if (transactionHash == "")
+    				this.txMessage = txMessage.message + " " + txMessage.stack;
+    			else
+    				this.txMessage = txMessage;
   			if (toAddress != "") {
   				console.log("toAddress=" + toAddress);
   			}

@@ -10,6 +10,8 @@
   "jumbo-text-manage-token": "토큰 컨트랙트 실행 해보기.",
   "jumbo-title-send-ether": "이더리움 전송하기",
   "jumbo-text-send-ether": "선택한 주소로 이더리움 전송",
+  "jumbo-title-sign-message": "메시지 사인하기",
+  "jumbo-text-sign-message": "어떤 메시지든 사인 할 수 있습니다",
   "tab-mint": "주조",
   "tab-transfer": "전송",
   "mint-token": "토큰 주조",
@@ -17,5 +19,6 @@
   "run": "실행",
   "delete": "삭제",
   "send-ether": "이더 전송",
+  "sign-message": "메시지 사인",
   "last":"last"
 }

@@ -307,8 +307,10 @@
 
       getAmountDivDecimals: function (amount) {
       	var big;
+      	if (amount == "0x")
+      		amount = "0x0";
       	if (amount.startsWith("0x")) 
-    			big = new bigdecimal.BigInteger(amount.replace("0x", ""), 16);
+    			big = new bigdecimal.BigInteger(amount.substring(2), 16);
     		else
     			big = new bigdecimal.BigInteger(amount);
     		var big10 = new bigdecimal.BigInteger("10");

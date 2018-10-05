@@ -12,16 +12,22 @@
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav mr-auto" >
           <li class="nav-item">
+            <router-link class="nav-link" active-class="active" to="/send-ether">{{ $t('send-ether') }}</router-link>
+          </li>
+          <li class="nav-item">
+            <router-link class="nav-link" active-class="active" to="/sign-message">{{ $t('sign-message') }}</router-link>
+          </li>
+          <li class="nav-item">
             <router-link class="nav-link" exact-active-class="active" to="/token-contract">{{ $t('menu-create-token') }}</router-link>
           </li>
           <li class="nav-item">
             <router-link class="nav-link" active-class="active" to="/manage-token">{{ $t('menu-manage-token') }}</router-link>
           </li>
           <li class="nav-item">
-            <router-link class="nav-link" active-class="active" to="/send-ether">{{ $t('send-ether') }}</router-link>
-          </li>
-          <li class="nav-item">
             <router-link class="nav-link" active-class="active" to="/about">About</router-link>
+          </li>
+          <li class="nav-item" v-if="env=='development'">
+            <router-link class="nav-link" active-class="active" to="/gamble">Gamble</router-link>
           </li>
         </ul>  
       </div>

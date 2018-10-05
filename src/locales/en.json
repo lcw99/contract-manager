@@ -9,6 +9,9 @@
   "jumbo-title-manage-token": "Manage Your Token",
   "jumbo-text-manage-token": "Run your token contracts.",
   "jumbo-title-send-ether": "Transfer ether",
+  "jumbo-text-send-ether": "Transfer ether to selected address",
+  "jumbo-title-sign-message": "Sign messgae",
+  "jumbo-text-sign-message": "Sign your message",
   "tab-mint": "Mint",
   "tab-transfer": "Transfer",
   "mint-token": "Mint Token",
@@ -16,5 +19,6 @@
   "run": "Run",
   "delete": "Delete",
   "send-ether": "Send Ether",
+  "sign-message": "Sign Message",
   "last":"last"
 }
